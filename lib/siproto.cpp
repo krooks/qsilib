@@ -627,8 +627,12 @@ void SiProto::serialReadyRead()
 
 QStringList SiProto::fullDeviceList( void )
 {
+#if defined( __APPLE__ ) || defined( __linux__ )
 #if defined( __APPLE__ )
 	QDir d( "/dev", "cu.*" );
+#elif defined( __linux__ )
+	QDir d( "/dev", "ttyUSB*" );
+#endif
 	d.setFilter( QDir::System );
 	QFileInfoList fl = d.entryInfoList();
 	QStringList sl;
