@@ -1,0 +1,10 @@
+
+USB Driver for Mac
+----
+
+- Get driver from http://www.silabs.com/products/mcu/pages/usbtouartbridgevcpdrivers.aspx
+- Install and reboot.
+- sudo kextunload /System/Library/Extensions/SiLabsUSBDriver.kext
+- Apply patch silabusbdriver_patch_for_sportident.patch to /System/Library/Extensions/SiLabsUSBDriver.kext/Contents/Info.plist
+- sudo kextload /System/Library/Extensions/SiLabsUSBDriver.kext
+
