@@ -58,6 +58,7 @@ private:
 	QAbstractButton *cancelButton;
 
 private slots:
+	void on_enableFeedback_clicked( bool v );
 	void on_operatingMode_currentIndexChanged(int index);
 	void on_resetBackup_clicked();
  void on_operatingMode_activated(int index);

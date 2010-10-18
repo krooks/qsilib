@@ -637,6 +637,12 @@ void Dialog::on_operatingMode_currentIndexChanged(int index)
    else
 	   ui->CardBlocks->setEnabled(false);
 }
+
+void Dialog::on_enableFeedback_clicked( bool v )
+{
+	si.setFeedbackEnabled( v );
+}
+
 void Dialog::on_resetBackup_clicked()
 {
 	if ( QMessageBox::warning(this, "Reset backup pointer", "Are you sure you want clear backup?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No )

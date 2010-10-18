@@ -79,7 +79,7 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
@@ -514,6 +514,13 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="enableFeedback">
+             <property name="text">
+              <string>Enable feedback</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
