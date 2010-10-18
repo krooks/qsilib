@@ -398,7 +398,7 @@ void SiCard6::addPunchBlock(int firstindex, const QByteArray &data)
 	for( int i=punches.length();i<(firstindex+32) && i<punchingcounter;i++ )
 		punches.append(PunchingRecord());
 	unsigned char *d = (unsigned char *)data.data();
-	for( int i=firstindex;i<punchingcounter;i++ ) {
+	for( int i=firstindex;i<(firstindex+32) && i<punchingcounter;i++ ) {
 		punches[i] = PunchingRecord(d+((i-firstindex)*4));
 	}
 }
