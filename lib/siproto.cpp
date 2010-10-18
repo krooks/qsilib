@@ -191,6 +191,11 @@ int SiCard::getCardNumber() const
 	return cardnum;
 }
 
+QByteArray SiCard::getRawData() const
+{
+	return rawData;
+}
+
 QString SiCard::dumpstr( void ) const
 {
 	if ( !valid ) {
@@ -228,6 +233,7 @@ void SiCard89pt::reset()
 {
 	punchingcounter = 0;
 	punches.clear();
+	rawData.clear();
 }
 
 void SiCard89pt::addBlock(int bn, const QByteArray &data)
@@ -253,12 +259,41 @@ void SiCard89pt::addBlock(int bn, const QByteArray &data)
 	}
 }
 
+SiCard6::SiCard6(const QByteArray &data)
+{
+	QList<QByteArray> blocks;
+	for( int i=0;i<data.length();i+=128 ) {
+		blocks.append( data.mid(i,128 ) );
+	}
+	qDebug( "Card from data: %i, blocks: %i", data.length(), blocks.count() );
+	resolveBackupBlocks( blocks );
+}
+
 void SiCard6::reset()
 {
+	rawData.clear();
 	punchingcounter = 0;
 	punches.clear();
 }
 
+void SiCard6::resolveBackupBlocks( const QList<QByteArray> &blocks )
+{
+	if ( blocks.count() == 2 ) {
+		addBlock(6, blocks[0]);
+		addBlock(7, blocks[1]);
+	} else if ( blocks.count() == 3 ) {
+		addBlock(0, blocks[0]);
+		resolveBackupBlocks( blocks.mid(1) );
+	} else if ( blocks.count() == 6 ) {
+		for( int i=0;i<6;i++ )
+			addBlock(i+1, blocks[i]);
+	} else if ( blocks.count() == 7 ) {
+		addBlock(0, blocks[0]);
+		resolveBackupBlocks( blocks.mid(1) );
+	} else {
+		qWarning( "Read backup of card6 with peculiar number of blocks. Don't know what to do" );
+	}
+}
 
 QString SiCard6::dumpstr() const
 {
@@ -325,6 +360,7 @@ void SiCard6::addInfoBlock2(const unsigned char *d)
 
 void SiCard6::addBlock(int bn, const QByteArray &data)
 {
+	rawData.append( data );
 	if ( data.length() != 128 ) {
 		qWarning( "Block with incorrect length: %i", data.length() );
 		return;
@@ -371,6 +407,7 @@ SiCard5::SiCard5( const QByteArray &data )
 {
 	if (data.length() != 128 )
 		return;
+	rawData = data;
 #ifdef SI_COMM_DEBUG
 	qDebug( "Settings SiCard5 data:" );
 	for( int i=0;i<128;i++ )
@@ -1365,4 +1402,16 @@ void SiProto::stopTasks()
 	startingbackup = false;
 	readingpunchbackup = false;
 	readingcardbackup = false;
+}
+
+SiCard SiProto::cardFromData( const QByteArray ba )
+{
+	unsigned char *b = (unsigned char *)ba.data();
+	if ( b[30] == 0x00 && b[31] == 0x07 )
+		return SiCard5( ba );
+	else if ( b[4] == 0xED && b[5] == 0xED && b[6] == 0xED && b[7] == 0xED  )
+		return SiCard6( ba );
+	else if ( b[4] == 0xEA && b[5] == 0xEA && b[6] == 0xEA && b[7] == 0xEA  )
+		qWarning( "Creating Card8 / Card9 / pCard from bytearray not impmlemented" );
+	return SiCard();
 }

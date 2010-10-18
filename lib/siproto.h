@@ -65,6 +65,8 @@ class SiCard {
 		QDateTime getFullCheckTime() const;
 		const QList<PunchingRecord> & getPunches() const;
 
+		QByteArray getRawData() const;
+
 		void print() const;
 		virtual QString dumpstr( void ) const;
 
@@ -88,6 +90,8 @@ class SiCard {
 		int word2int( const unsigned char *d );
 		void calcFullTimes( void );
 		QDateTime closestVariant( const QDateTime &from, const QTime &t );
+
+		QByteArray rawData;
 };
 
 class SiCard89pt : public SiCard
@@ -125,6 +129,9 @@ class SiCard89pt : public SiCard
 class SiCard6 : public SiCard
 {
 	public:
+		SiCard6(const QByteArray &data);
+		SiCard6() : SiCard() {};
+		void resolveBackupBlocks( const QList<QByteArray> &blocks );
 		void reset();
 		void addBlock( int bn, const QByteArray &data128 );
 		QString dumpstr( void ) const;
@@ -264,6 +271,7 @@ class SiProto : public QObject {
 		void setDoHandshake( bool v ) {
 			doHandshake = v;
 		}
+		static SiCard cardFromData( const QByteArray ba );
 
 	private:
 		QStringList fullDeviceList( void );
