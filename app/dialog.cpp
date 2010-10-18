@@ -587,7 +587,7 @@ void Dialog::gotBackupSiCard(const SiCard *card)
 	rd.append(new QStandardItem(QString("%0").arg(card->getCardNumber())) );
 	QList<PunchingRecord> plist = card->getPunches();
 	for( int i=0;i<plist.count();i++ ) {
-		rd.append(new QStandardItem(plist.at(i).time.toString()));
+		rd.append(new QStandardItem(QString("%0-%1").arg(plist.at(i).cn).arg(plist.at(i).time.toString())));
 	}
 	backupmodel->appendRow(rd);
 	ui->stationBackupView->scrollTo(backupmodel->index(backupmodel->rowCount()-1,0));
