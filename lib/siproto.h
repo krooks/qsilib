@@ -245,7 +245,7 @@ class SiProto : public QObject {
 			StationCheck = 10
 		};
 
-		QList<SiCard*> GetCardBackupData();
+		QList<SiCard> GetCardBackupData( unsigned int startaddr=0x100, int bmem=0);
 		bool StartGetBackup();
 		bool StartGetPunchBackupData();
 		bool StartGetCardBackupData();

@@ -1319,57 +1319,33 @@ QList<PunchBackupData> SiProto::GetPunchBackupData()
 	return resp;
 }
 
-QList<SiCard*> SiProto::GetCardBackupData()
+QList<SiCard> SiProto::GetCardBackupData( unsigned int startaddr, int bmem)
 {
-	QList<SiCard*> resp;
-	QByteArray ba;
-	if ( !GetSystemValue( SiProto::BackupMemoryAddres, 0x07, &ba ) )
-		return resp;
-	int bmem = 0;
-	bmem = ((unsigned char)ba.at(0))<<24;
-	bmem |= ((unsigned char)ba.at(1))<<16;
-	bmem |= ((unsigned char)ba.at(5))<<8;
-	bmem |= ((unsigned char)ba.at(6));
+	QList<SiCard> resp;
+	if ( bmem == 0 ) {
+		QByteArray ba;
+		if ( !GetSystemValue( SiProto::BackupMemoryAddres, 0x07, &ba ) )
+			return resp;
+		bmem = ((unsigned char)ba.at(0))<<24;
+		bmem |= ((unsigned char)ba.at(1))<<16;
+		bmem |= ((unsigned char)ba.at(5))<<8;
+		bmem |= ((unsigned char)ba.at(6));
+	}
 	
 	unsigned int raddr;
-	int card6blockstoread = 0;
 	QByteArray bdata;
-	unsigned int startaddr = 0x100;
+	card6blocksread = 0;
 	for ( int j=startaddr;j<bmem;j+=128 ) {
 		if ( GetDataFromBackup( j, 128, &raddr, &bdata ) ) {
 			if ( bdata.length() != 128 ) {
 				qWarning( "Could not get 128 bytes of backup data" );
 				continue;
 			}
-			unsigned char *d = (unsigned char *)bdata.data();
-			if ( d[30] == 0x00 &&
-				 d[31] == 0x07 ) {
-				SiCard5 *card = new SiCard5( bdata );
-				resp.append( card );
-				emit backupCard(card);
-			} else if ( d[4] == 0xED &&
-						d[5] == 0xED &&
-						d[6] == 0xED &&
-						d[7] == 0xED  ) {
-				SiCard6 *card = new SiCard6;
-				card6blockstoread = 7;
-				card->addBlock(7-card6blockstoread, bdata);
-				resp.append( card );
-			} else if ( card6blockstoread > 0 ) {
-				SiCard6 *card = (SiCard6*)resp.last();
-				card6blockstoread--;
-				card->addBlock(7-card6blockstoread, bdata);
-				if ( !card6blockstoread )
-					emit backupCard(card);
-			} else {
-				if ( d[4] == 0xEA && 
-					 d[5] == 0xEA &&
-					 d[6] == 0xEA &&
-					 d[7] == 0xEA  )
-					qWarning( "Got card version 8 : Unimplemented" );
-			}
+			handleCardBackupData(raddr, bdata, &resp);
 		}
 	}
+	if ( card6blocksread )
+		resolveCard6Backup(&resp);
 	return resp;
 }
 
