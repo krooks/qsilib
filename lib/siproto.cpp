@@ -438,7 +438,7 @@ SiCard5::SiCard5( const QByteArray &data )
 	punches.clear();
 	int i;
 	for( i=0;i<(punchingcounter-1) && i<31;i++ ) {
-		int pstart = 0x21+((i*3+1)/16 )+(i*3);
+		int pstart = 0x21+((int)((i)/5))+(i*3);
 		punches.append( PunchingRecord( data.at(pstart), siTime( data.at(pstart+1), data.at(pstart+2) ) ) );
 	}
 	for(;i<(punchingcounter-1)&&i<37;i++ )
