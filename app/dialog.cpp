@@ -548,43 +548,6 @@ void Dialog::on_readBackup_clicked()
 {
 	startTask( taskGetBackup, 1 ); // TODO commmand number vale.
 	return;
-	// TODO continue
-	si.StartGetPunchBackupData();
-	return;
-	// TODO set progress number here
-	commandWrapper cw( &si, ui->MSMode->currentIndex(), ui->progressBar, 2 );
-	Q_UNUSED( cw );
-
-	backupmodel->clear();
-	QByteArray ba;
-	if ( !si.GetSystemValue(SiProto::StationMode, 1, &ba) )
-		return;
-	if ( ba.length() < 1 )
-		return;
-	if ( ((unsigned char)ba.at(0)) == SiProto::StationReadSICards ) {
-		QList<SiCard*> clist = si.GetCardBackupData();
-		return;
-		QList<QStandardItem*> rd;
-		for( int i=0;i<clist.count();i++ ) {
-			SiCard *card = clist.at(i);
-			rd.clear();
-			rd.append(new QStandardItem(QString("%0").arg(card->getCardNumber())) );
-			QList<PunchingRecord> plist = card->getPunches();
-			for( int i=0;i<plist.count();i++ ) {
-				rd.append(new QStandardItem(plist.at(i).time.toString()));
-			}
-			backupmodel->appendRow(rd);
-		}
-	} else {
-		QList<PunchBackupData> pdlist = si.GetPunchBackupData();
-		QList<QStandardItem*> rd;
-		for( int i=0;i<pdlist.count();i++ ) {
-			rd.clear();
-			rd.append(new QStandardItem(QString("%0").arg(pdlist.at(i).cardnum)));
-			rd.append(new QStandardItem(QString("%0").arg(pdlist.at(i).t.toString())));
-			backupmodel->appendRow(rd);
-		}
-	}
 }
 
 void Dialog::readBackupBlock(int num, int total)
