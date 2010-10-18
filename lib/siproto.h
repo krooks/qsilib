@@ -265,6 +265,8 @@ class SiProto : public QObject {
 		bool GetTime( QDateTime *dt, int *cn = NULL );
 		bool SetTime( const QDateTime &sdt );
 		bool SetTime( const QDateTime &sdt, QDateTime *dt, int *cn = NULL );
+		bool ResetBackup();
+		bool ResetBackup( int *cn );
 
 		void stopTasks();
 
@@ -320,6 +322,7 @@ class SiProto : public QObject {
 		BaseCommandGetSICard6 = 0x61,
 		BaseCommandSetMSMode = 0x70,
 		BaseCommandGetBackupData = 0x74,
+		BaseCommandEraseBackupData = 0x75,
 		BaseCommandSetTime = 0x76, // Needs testing
 		BaseCommandGetTime = 0x77,
 		CommandGetBackupData = 0x81,
@@ -396,6 +399,7 @@ class SiProto : public QObject {
 		void gotSystemValue( unsigned char addr, const QByteArray &ba, int cn );
 		void gotSetSystemValue( unsigned char addr, const QByteArray &ba, int cn );
 		void gotBackupData( unsigned int addr, const QByteArray &ba, int cn );
+		void gotErasedBackup();
 };
 
 #endif

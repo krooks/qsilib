@@ -491,7 +491,7 @@ SiProto::SiProto( QObject *parent ) :
 		baseCommands.insert( CommandSICard6Detected, BaseCommandSICard6Detected );
 		baseCommands.insert( CommandSetMSMode, BaseCommandSetMSMode );
 		baseCommands.insert( CommandGetBackupData, BaseCommandGetBackupData );
-		baseCommands.insert( CommandEraseBackupData, 0x75 );
+		baseCommands.insert( CommandEraseBackupData, BaseCommandEraseBackupData );
 		baseCommands.insert( CommandSetTime, BaseCommandSetTime );
 		baseCommands.insert( CommandGetTime, BaseCommandGetTime );
 		baseCommands.insert( CommandSetBaudRate, 0x7E );
@@ -631,6 +631,9 @@ void SiProto::serialReadyRead()
 				break;
 			case CommandSetSystemValue:
 				emit gotSetSystemValue( data.at(0), data.mid(1), cn );
+				break;
+			case CommandEraseBackupData: case BaseCommandEraseBackupData:
+				emit gotErasedBackup();
 				break;
 			case CommandGetBackupData: case BaseCommandGetBackupData:
 				{
@@ -1414,4 +1417,23 @@ SiCard SiProto::cardFromData( const QByteArray ba )
 	else if ( b[4] == 0xEA && b[5] == 0xEA && b[6] == 0xEA && b[7] == 0xEA  )
 		qWarning( "Creating Card8 / Card9 / pCard from bytearray not impmlemented" );
 	return SiCard();
+}
+
+bool SiProto::ResetBackup( int *cn  )
+{
+	CommandReceiver cr( this, CommandEraseBackupData );
+
+	if ( !sendCommand( CommandEraseBackupData ) )
+		return false;
+
+	if ( !cr.waitForCommand(timeoutforcommands) )
+		return false;
+	if ( cn )
+		*cn = cr.cn;
+	return true;
+}
+
+bool SiProto::ResetBackup()
+{
+	return sendCommand( CommandEraseBackupData );
 }

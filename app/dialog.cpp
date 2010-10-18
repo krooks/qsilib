@@ -83,6 +83,7 @@ Dialog::Dialog(QWidget *parent) :
 	connect( &si, SIGNAL(gotNAK()), SLOT(stopTask()) );
 	connect( &si, SIGNAL(gotSystemValue(unsigned char,QByteArray,int)), SLOT(gotSystemValu(unsigned char,QByteArray)) );
 	connect( &si, SIGNAL(gotSetSystemValue(unsigned char,QByteArray,int)), SLOT(gotSetSystemValu(unsigned char,QByteArray)) );
+	connect( &si, SIGNAL(gotErasedBackup()), SLOT(stopTask()) );
 	fillCardBlocksCombo();
 
 	connect( ui->buttonBox, SIGNAL(clicked(QAbstractButton*)), SLOT(buttonClicked(QAbstractButton*)) );
@@ -286,6 +287,9 @@ void Dialog::gotMSMode( SiProto::MSMode )
 			stopTask();
 	} else if ( currenttask == taskWriteConf ) {
 		if ( !si.GetSystemValue(0x00,0x80) )
+			stopTask();
+	} else if ( currenttask == taskEraseBackup ) {
+		if ( !si.ResetBackup() )
 			stopTask();
 	} else if ( currenttask == taskGetBackup ) {
 		if ( !si.StartGetBackup() )
@@ -632,4 +636,10 @@ void Dialog::on_operatingMode_currentIndexChanged(int index)
 	   ui->CardBlocks->setEnabled(true);
    else
 	   ui->CardBlocks->setEnabled(false);
+}
+void Dialog::on_resetBackup_clicked()
+{
+	if ( QMessageBox::warning(this, "Reset backup pointer", "Are you sure you want clear backup?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No )
+		return;
+	startTask(taskEraseBackup, 1);
 }

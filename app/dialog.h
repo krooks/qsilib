@@ -28,6 +28,7 @@ private:
 		taskSetTime,
 		taskReadConf,
 		taskWriteConf,
+		taskEraseBackup,
 		taskGetBackup
 	};
 	Ui::Dialog *ui;
@@ -58,6 +59,7 @@ private:
 
 private slots:
 	void on_operatingMode_currentIndexChanged(int index);
+	void on_resetBackup_clicked();
  void on_operatingMode_activated(int index);
  void on_saveStationBackup_clicked();
  void on_clearBackup_clicked();
