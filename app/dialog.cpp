@@ -553,6 +553,12 @@ void Dialog::on_readBackup_clicked()
 void Dialog::readBackupBlock(int num, int total)
 {
 	bar->showMessage(QString("Read backup block %0 from %1").arg(num).arg(total));
+	if ( total == 0 ) {
+		ui->progressBar->setMaximum(1);
+		ui->progressBar->setValue(1);
+		stopTask();
+		return;
+	}
 	ui->progressBar->setMaximum(total);
 	ui->progressBar->setValue(num);
 	if ( currenttask == taskGetBackup && num == total )
