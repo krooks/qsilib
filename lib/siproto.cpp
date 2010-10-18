@@ -104,9 +104,11 @@ PunchBackupData::PunchBackupData( unsigned char *a, int size, double sw, int scn
 	cn = scn;
 }
 
-void PunchBackupData::print( void ) const
+QString PunchBackupData::dumpstr( void ) const
 {
-	qDebug( "CardNum: %i, Time: %s, dayofweek: %i", cardnum, qPrintable( t.toString() ), dayofweek );
+	QString s;
+	s.sprintf( "CardNum: %i, Time: %s, dayofweek: %i\n", cardnum, qPrintable( t.toString() ), dayofweek );
+	return s;
 }
 
 QDateTime SiCard::closestVariant( const QDateTime &from, const QTime &t )
@@ -136,6 +138,11 @@ QDateTime SiCard::closestVariant( const QDateTime &from, const QTime &t )
 		besttime = dt;
 	}
 	return besttime;
+}
+
+void SiCard::print( void ) const
+{
+	qDebug("%s", qPrintable( dumpstr() ) );
 }
 
 QDateTime SiCard::getFullStartTime() const
@@ -184,20 +191,25 @@ int SiCard::getCardNumber() const
 	return cardnum;
 }
 
-void SiCard::print( void ) const
+QString SiCard::dumpstr( void ) const
 {
 	if ( !valid ) {
-		qDebug( "Invalid card" );
+		return "Invalid card";
 	}
-	qDebug( "Card number: %i", cardnum );
+	QString s;
+	s += QString( "Card number: %0\n").arg(cardnum);
 	if ( !starttime.time.isNull() )
-		qDebug( "Start: %s", qPrintable( starttime.time.toString() ) );
-	qDebug( "Country code: 0x%02X, %i", countrycode, countrycode );
-	qDebug( "Club code: 0x%02X, %i", clubcode, clubcode );
-	qDebug( "Start number: %i", startnum );
-	qDebug( "Punching counter: %i", punchingcounter );
+		s += QString("Start: %0\n").arg( starttime.time.toString() );
+	QString tmp;
+	tmp.sprintf( "Country code: 0x%02X, %i\n", countrycode, countrycode );
+	s += tmp;
+	tmp.sprintf( "Club code: 0x%02X, %i\n", clubcode, clubcode );
+	s += tmp;
+	s += QString("Start number: %0\n").arg(startnum);
+	s += QString("Punching counter: %0\n").arg(punchingcounter);
 	for( int i=0;i<punches.count();i++ )
-		qDebug( "P %i: CN: %i, %s", i, punches.at(i).cn, qPrintable( punches.at(i).time.toString() ) );
+		s += QString( "P %0: CN: %1, %2\n").arg(i).arg(punches.at(i).cn).arg( punches.at(i).time.toString() );
+	return s;
 }
 
 int SiCard::word2int(const unsigned char *d)
@@ -247,24 +259,27 @@ void SiCard6::reset()
 	punches.clear();
 }
 
-void SiCard6::print()
+
+QString SiCard6::dumpstr() const
 {
-	qDebug( "SI card 6" );
-	qDebug( "First/Last name: %s/%s", qPrintable(firstname), qPrintable(lastname) );
-	qDebug( "Country: %s", qPrintable( country ) );
-	qDebug( "Club: %s", qPrintable( club ) );
-	qDebug( "Start number: %i", startnum );
-	qDebug( "Class: %s", qPrintable(contclass) );
-	qDebug( "User-id: %s", qPrintable( userid ) );
-	qDebug( "Phone number: %s", qPrintable( phone ) );
-	qDebug( "E-mail: %s", qPrintable( email ) );
-	qDebug( "Street: %s", qPrintable( street ) );
-	qDebug( "City: %s", qPrintable( city ) );
-	qDebug( "Zip-code: %s", qPrintable( zip ) );
-	qDebug( "Day Of Birth: %s", qPrintable( dayofbirth ) );
-	qDebug( "Sex: %c", sex );
+	QString s;
+	s = QString( "SI card 6\n" );
+	s+=QString("First/Last name: %0/%1\n").arg(firstname).arg(lastname);
+	s+=QString("Country: %0\n").arg(country);
+	s+=QString("Club: %0\n").arg(club);
+	s+=QString("Start number: %0\n").arg(startnum);
+	s+=QString("Class: %0\n").arg(contclass);
+	s+=QString("User-id: %0\n").arg(userid);
+	s+=QString("Phone number: %0\n").arg(phone);
+	s+=QString("E-mail: %0\n").arg(email);
+	s+=QString("Street: %0\n").arg(street);
+	s+=QString("City: %0\n").arg(city);
+	s+=QString("Zip-code: %0\n").arg(zip);
+	s+=QString("Day Of Birth: %0\n").arg(dayofbirth);
+	s+=QString("Sex: %0\n").arg(sex);
 	// user-id, mobile, e-mail, street, city, zip, sex, day of birth, date of product
-	SiCard::print();
+	s += SiCard::dumpstr();
+	return s;
 }
 
 void SiCard6::addInfoBlock1(const unsigned char *d)
@@ -398,17 +413,23 @@ SiCard5::SiCard5( const QByteArray &data )
 }
 
 
-void SiCard5::print( void ) const
+QString SiCard5::dumpstr( void ) const
 {
-	qDebug( "SI Card 5" );
-	qDebug( "Software versoin: %i", softwareversion );
-	qDebug( "checksum: %i,0x%02X", checksum, checksum );
+	QString s;
+	s = "SI Card 5\n";
+	s+= QString( "Software versoin: %0\n").arg(softwareversion);
+	QString tmp;
+	tmp.sprintf("checksum: %i,0x%02X\n", checksum, checksum );
+	s += tmp;
+	/*
 	unsigned char sn1 = rawdata.at(SN1);
 	unsigned char sn0 = rawdata.at(SN0);
 	unsigned char sns = rawdata.at(SNS);
 	unsigned char st = sn1+sn0+sns;
 	qDebug( "Test: %i,0x%02X", st, st );
-	SiCard::print();
+	*/
+	s += SiCard::dumpstr();
+	return s;
 }
 
 SiProto::SiProto( QObject *parent ) :

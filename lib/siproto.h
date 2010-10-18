@@ -18,7 +18,7 @@ class PunchBackupData {
 		int dayofweek; // 0-Sun, 1-Mon
 		int cn;
 
-		void print( void ) const;
+		QString dumpstr( void ) const;
 	private:
 		unsigned char SI2, SI1, SI0, TH, TL, TD, TSS, SI3, DATE1, DATE0, MS;
 };
@@ -65,7 +65,8 @@ class SiCard {
 		QDateTime getFullCheckTime() const;
 		const QList<PunchingRecord> & getPunches() const;
 
-		virtual void print() const;
+		void print() const;
+		virtual QString dumpstr( void ) const;
 
 	protected:
 		int countrycode;
@@ -94,7 +95,7 @@ class SiCard89pt : public SiCard
 	public:
 		void reset();
 		void addBlock( int bn, const QByteArray &data128 );
-		void print();
+		//QString dumpstr( void ) const;
 	private:
 		enum {
 			UID0 = 0x00,
@@ -126,7 +127,7 @@ class SiCard6 : public SiCard
 	public:
 		void reset();
 		void addBlock( int bn, const QByteArray &data128 );
-		void print();
+		QString dumpstr( void ) const;
 
 	private:
 		void addPunchBlock( int firstindex, const QByteArray &data );
@@ -171,7 +172,7 @@ class SiCard5 : public SiCard
 {
 	public:
 		SiCard5( const QByteArray &data128 );
-		void print() const;
+		QString dumpstr( void ) const;
 		
 	private:
 		enum Fields {
