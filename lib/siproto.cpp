@@ -624,7 +624,11 @@ void SiProto::serialReadyRead()
 				}
 				if ( readingpunchbackup || readingcardbackup) {
 					int stilltoread = lastreadinfo.backupmemaddr-backupreadpointer;
-					GetDataFromBackup( backupreadpointer, (stilltoread>lastreadinfo.backupreadsize ? lastreadinfo.backupreadsize : stilltoread));
+					if ( stilltoread > 0 )
+						GetDataFromBackup( backupreadpointer, (stilltoread>lastreadinfo.backupreadsize ? lastreadinfo.backupreadsize : stilltoread));
+					else {
+						emit backupBlockNumFrom(0, 0);
+					}
 					break;
 				}
 				emit gotSystemValue( data.at(0), data.mid(1), cn );
@@ -945,6 +949,8 @@ bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 
 bool SiProto::GetDataFromBackup( unsigned int startaddr, unsigned int readsize )
 {
+	if ( readsize == 0 )
+		return false;
 	QByteArray ba;
 	ba.append( (startaddr>>16)&0xFF );
 	ba.append( (startaddr>>8)&0xFF );
