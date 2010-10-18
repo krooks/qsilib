@@ -655,10 +655,8 @@ void SiProto::serialReadyRead()
 						int blocknum = (backupreadpointer-0x100)/lastreadinfo.backuprecordsize;
 						emit backupBlockNumFrom(blocknum, total);
 						if ( stilltoread < lastreadinfo.backuprecordsize ) {
-							if ( card6blocksread ) {
-								emit backupCard(&card6forread);
-								card6blocksread = 0;
-							}
+							if ( card6blocksread )
+								resolveCard6Backup(NULL);
 							break;
 						}
 						GetDataFromBackup( backupreadpointer, (stilltoread>lastreadinfo.backupreadsize ? lastreadinfo.backupreadsize : stilltoread));
@@ -1231,7 +1229,17 @@ void SiProto::handlePunchBackupData(unsigned int /*addr*/, const QByteArray &dat
 	}
 }
 
-void SiProto::handleCardBackupData(unsigned int /*addr*/, const QByteArray &data)
+void SiProto::resolveCard6Backup(QList<SiCard> *clist)
+{
+	card6forread.resolveBackupBlocks( card6backupblocks );
+	if ( clist ) {
+		clist->append( card6forread );
+	}
+	emit backupCard(&card6forread);
+	card6blocksread = 0;
+}
+
+void SiProto::handleCardBackupData(unsigned int /*addr*/, const QByteArray &data, QList<SiCard> *clist )
 {
 	const unsigned char *b = (const unsigned char *)data.data();
 	if ( data.length() != 128 ) {
@@ -1239,34 +1247,30 @@ void SiProto::handleCardBackupData(unsigned int /*addr*/, const QByteArray &data
 		return;
 	}
 	if ( data.at(30) == 0x00 && data.at(31) == 0x07 ) {
-		if ( card6blocksread ) {
-			emit backupCard(&card6forread);
-			card6blocksread = 0;
-		}
+		if ( card6blocksread )
+			resolveCard6Backup(clist);
 		SiCard5 card( data );
 		emit backupCard(&card);
+		if ( clist )
+			clist->append( card );
+		return;
 	} else if ( b[4] == 0xED && b[5] == 0xED && b[6] == 0xED && b[7] == 0xED  ) {
-		if ( card6blocksread ) {
-			emit backupCard(&card6forread);
-			card6blocksread = 0;
-		}
+		if ( card6blocksread )
+			resolveCard6Backup(clist);
 		card6forread.reset();
 		card6forread.addBlock(0, data);
 		card6blocksread = 1;
+		card6backupblocks.clear();
+		return;
 	} else if ( b[4] == 0xEA && b[5] == 0xEA && b[6] == 0xEA && b[7] == 0xEA  ) {
-		if ( card6blocksread ) {
-			emit backupCard(&card6forread);
-			card6blocksread = 0;
-		}
+		if ( card6blocksread )
+			resolveCard6Backup(clist);
 		qWarning( "Backup reading Card8 / Card9 / pCard not impmlemented" );
 	}
 	if ( card6blocksread ) {
-		card6forread.addBlock(card6blocksread++, data);
-		if ( card6blocksread == 7 ) {
-			emit backupCard(&card6forread);
-			card6blocksread = 0;
-		}
-		return;
+		card6backupblocks.append( data );
+		if ( card6backupblocks.count() == 6 )
+			resolveCard6Backup(clist);
 	}
 }
 

@@ -295,7 +295,7 @@ class SiProto : public QObject {
 		bool GetDataFromBackup( unsigned int startaddr, unsigned int readsize, unsigned int *readaddr, QByteArray *ba, int *cn = NULL );
 		void updateSystemInfo(unsigned char addr, const QByteArray &data);
 		void handlePunchBackupData( unsigned int addr, const QByteArray &data, int cn );
-		void handleCardBackupData( unsigned int addr, const QByteArray &data );
+		void handleCardBackupData( unsigned int addr, const QByteArray &data, QList<SiCard> *clist=NULL );
 
 		struct systeminfo {
 			double swversion;
@@ -377,7 +377,9 @@ class SiProto : public QObject {
 	SiCard6 card6forread;
 	SiCard89pt card89ptforread;
 	int card6blocksread;
+	QList<QByteArray> card6backupblocks;
 	int lastcard6block;
+	void resolveCard6Backup(QList<SiCard> *clist = NULL);
 
 	private slots:
 		void serialReadyRead();
