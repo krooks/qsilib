@@ -896,8 +896,6 @@ bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 			if ( sibuf.length() < 3 )
 				continue;
 			length = (unsigned char)sibuf.at(2);
-			if ( cmnd == 0x81 )
-				length -= 2;
 			if ( sibuf.length() < 6+length )
 				continue;
 #ifdef SI_COMM_DEBUG
