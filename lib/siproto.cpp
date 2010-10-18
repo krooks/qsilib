@@ -649,7 +649,7 @@ void SiProto::serialReadyRead()
 						int stilltoread = lastreadinfo.backupmemaddr-backupreadpointer;
 						int total = (lastreadinfo.backupmemaddr-0x100)/lastreadinfo.backuprecordsize;
 						int blocknum = (backupreadpointer-0x100)/lastreadinfo.backuprecordsize;
-						emit backupBlocmNumFrom(blocknum, total);
+						emit backupBlockNumFrom(blocknum, total);
 						if ( stilltoread < lastreadinfo.backuprecordsize ) {
 							if ( card6blocksread ) {
 								emit backupCard(&card6forread);

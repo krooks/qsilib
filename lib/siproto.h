@@ -391,7 +391,7 @@ class SiProto : public QObject {
 		void cardRead( const SiCard & );
 		void backupCard( const SiCard * );
 		void backupPunch( const PunchBackupData & );
-		void backupBlocmNumFrom( int num, int from );
+		void backupBlockNumFrom( int num, int from );
 
 		void gotTime( const QDateTime &dt, const QDateTime &ct, int cn );
 		void gotSetTime( const QDateTime &dt, int cn );

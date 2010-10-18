@@ -75,7 +75,7 @@ Dialog::Dialog(QWidget *parent) :
 	connect( &si, SIGNAL(backupPunch(PunchBackupData)), SLOT(gotBackupPunch(PunchBackupData)));
 	connect( &si, SIGNAL(gotCommand(unsigned char,QByteArray,int)), SLOT(updateProgressBar()) );
 	connect( &si, SIGNAL(sentCommand(unsigned char,QByteArray)), SLOT(updateProgressBar()) );
-	connect( &si, SIGNAL(backupBlocmNumFrom(int,int)), SLOT(readBackupBlock(int,int)) );
+	connect( &si, SIGNAL(backupBlockNumFrom(int,int)), SLOT(readBackupBlock(int,int)) );
 
 	connect( &si, SIGNAL(gotMSMode(SiProto::MSMode,int)), SLOT(gotMSMode(SiProto::MSMode)));
 	connect( &si, SIGNAL(gotTime(QDateTime,QDateTime,int)), SLOT(gotTime(QDateTime,QDateTime)) );
