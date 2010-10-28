@@ -85,6 +85,8 @@ private slots:
  void gotSetTime( const QDateTime & );
  void gotSystemValu( unsigned char addr, const QByteArray &ba );
  void gotSetSystemValu( unsigned char addr, const QByteArray &ba );
+
+ void badParameter( const QString &msg );
 };
 
 #endif // DIALOG_H

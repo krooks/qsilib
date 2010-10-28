@@ -84,6 +84,8 @@ Dialog::Dialog(QWidget *parent) :
 	connect( &si, SIGNAL(gotSystemValue(unsigned char,QByteArray,int)), SLOT(gotSystemValu(unsigned char,QByteArray)) );
 	connect( &si, SIGNAL(gotSetSystemValue(unsigned char,QByteArray,int)), SLOT(gotSetSystemValu(unsigned char,QByteArray)) );
 	connect( &si, SIGNAL(gotErasedBackup()), SLOT(stopTask()) );
+	connect( &si, SIGNAL(badParameter( const QString & )),
+				SLOT( badParameter( const QString & ) ) );
 	fillCardBlocksCombo();
 
 	connect( ui->buttonBox, SIGNAL(clicked(QAbstractButton*)), SLOT(buttonClicked(QAbstractButton*)) );
@@ -95,6 +97,12 @@ Dialog::Dialog(QWidget *parent) :
 Dialog::~Dialog()
 {
     delete ui;
+}
+
+void Dialog::badParameter( const QString &msg )
+{
+	QMessageBox::warning( this, "Bad parameter", msg );
+	stopTask();
 }
 
 void Dialog::buttonClicked(QAbstractButton *b)
