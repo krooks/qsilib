@@ -292,8 +292,16 @@ void Dialog::gotMSMode( SiProto::MSMode )
 		if ( !si.ResetBackup() )
 			stopTask();
 	} else if ( currenttask == taskGetBackup ) {
-		if ( !si.StartGetBackup() )
-			stopTask();
+		if ( ui->readFromAddressCheckbox->isChecked() ) {
+			if ( !si.StartGetBackup( 
+						ui->backupStartAddress->value(),
+						ui->backupReadSize->value() ) )
+					stopTask();
+
+		} else {
+			if ( !si.StartGetBackup() )
+				stopTask();
+		}
 	} else if ( currenttask == taskNone ) {
 		if ( ui->progressBar->value() < ui->progressBar->maximum() ) {
 			ui->progressBar->setStyleSheet("QProgressBar { border: 2px solid grey; border-radius: 5px; } QProgressBar::chunk { background-color: rgb(255, 0, 0);}" );
