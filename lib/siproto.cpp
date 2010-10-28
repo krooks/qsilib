@@ -613,17 +613,26 @@ void SiProto::serialReadyRead()
 					sendCommand( CommandGetSICard6, ba );
 					break;
 				} else if ( startingbackup ) {
-					if ( lastreadinfo.stationmode == StationReadSICards ) {
+					if ( (backupreadpointer-0x100) % lastreadinfo.backuprecordsize ) {
+						emit badParameter(QString("Bad starting address from backup memory read. Should be multiple of %1 since 0x100").arg(lastreadinfo.backuprecordsize) );
+					} else if ( backupreadendaddr > 0x20000) {
+						emit badParameter("Backup read size too big" );
+					} else if ( backupreadendaddr && (backupreadendaddr-0x100) % lastreadinfo.backuprecordsize ) {
+						emit badParameter(QString("Bad read size for backup memory read. Should be multiple of %1").arg(lastreadinfo.backuprecordsize ) );
+
+					} else if ( lastreadinfo.stationmode == StationReadSICards ) {
 						readingcardbackup = true;
 						card6blocksread = 0;
 					} else {
 						readingpunchbackup = true;
 					}
-					backupreadpointer = 0x100;
+					if ( backupreadendaddr == 0 ) {
+						backupreadendaddr = lastreadinfo.backupmemaddr;
+					}
 					startingbackup = false;
 				}
 				if ( readingpunchbackup || readingcardbackup) {
-					int stilltoread = lastreadinfo.backupmemaddr-backupreadpointer;
+					int stilltoread = backupreadendaddr-backupreadpointer;
 					if ( stilltoread > 0 )
 						GetDataFromBackup( backupreadpointer, (stilltoread>lastreadinfo.backupreadsize ? lastreadinfo.backupreadsize : stilltoread));
 					else {
@@ -650,8 +659,8 @@ void SiProto::serialReadyRead()
 						handleCardBackupData(readaddr, data.mid(3));
 					if ( readingpunchbackup || readingcardbackup ) {
 						backupreadpointer += data.length()-3;
-						int stilltoread = lastreadinfo.backupmemaddr-backupreadpointer;
-						int total = (lastreadinfo.backupmemaddr-0x100)/lastreadinfo.backuprecordsize;
+						int stilltoread = backupreadendaddr-backupreadpointer;
+						int total = (backupreadendaddr-0x100)/lastreadinfo.backuprecordsize;
 						int blocknum = (backupreadpointer-0x100)/lastreadinfo.backuprecordsize;
 						emit backupBlockNumFrom(blocknum, total);
 						if ( stilltoread < lastreadinfo.backuprecordsize ) {
@@ -1200,8 +1209,13 @@ bool SiProto::searchAndOpen( void )
 	return false;
 }
 
-bool SiProto::StartGetBackup()
+bool SiProto::StartGetBackup( int startaddr, int size )
 {
+	backupreadpointer = startaddr;
+	if ( size>0 )
+		backupreadendaddr = startaddr+size;
+	else
+		backupreadendaddr = 0;
 	startingbackup = true;
 	return GetSystemValue( 0, 0x80 );
 }

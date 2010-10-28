@@ -246,7 +246,7 @@ class SiProto : public QObject {
 		};
 
 		QList<SiCard> GetCardBackupData( unsigned int startaddr=0x100, int bmem=0);
-		bool StartGetBackup();
+		bool StartGetBackup( int startaddr=0x100, int size=0);
 		bool StartGetPunchBackupData();
 		bool StartGetCardBackupData();
 		QList<PunchBackupData> GetPunchBackupData();
@@ -308,6 +308,7 @@ class SiProto : public QObject {
 			int backupreadsize;
 		} lastreadinfo;
 		int backupreadpointer;
+		int backupreadendaddr;
 	enum ProtocolCharacer {
 		STX = 0x02, // Start of text, first byte to be transmitted
 		ETX = 0x03, // End of text, last byte to be transmitted
@@ -402,6 +403,8 @@ class SiProto : public QObject {
 		void gotSetSystemValue( unsigned char addr, const QByteArray &ba, int cn );
 		void gotBackupData( unsigned int addr, const QByteArray &ba, int cn );
 		void gotErasedBackup();
+
+		void badParameter( const QString &msg );
 };
 
 #endif
