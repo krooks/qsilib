@@ -1,0 +1,14 @@
+Makefile
+*.swp
+app/Makefile
+app/*.o
+app/moc_*.cpp
+app/ui_*.h
+app/*.swp
+app/app.app
+lib/Makefile
+lib/*.o
+lib/moc_*.cpp
+lib/ui_*.h
+lib/*.swp
+lib/lib*.a
