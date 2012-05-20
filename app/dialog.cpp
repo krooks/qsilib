@@ -516,7 +516,7 @@ void Dialog::siCardRead(const SiCard &card)
 	rd.append(new QStandardItem(QString("%0").arg(card.getCardNumber())) );
 	QList<PunchingRecord> plist = card.getPunches();
 	for( int i=0;i<plist.count();i++ ) {
-		rd.append(new QStandardItem(plist.at(i).time.toString()));
+		rd.append(new QStandardItem(QString("%1: %2").arg(plist.at(i).cn).arg(plist.at(i).time.toString())));
 	}
 	sicardmodel->appendRow(rd);
 }
