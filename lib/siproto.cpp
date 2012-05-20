@@ -437,12 +437,12 @@ SiCard5::SiCard5( const QByteArray &data )
 	punchingcounter = (unsigned char)data.at(PC);
 	punches.clear();
 	int i;
-	for( i=0;i<(punchingcounter-1) && i<31;i++ ) {
+	for( i=0;i<(punchingcounter-1) && i<30;i++ ) {
 		int pstart = 0x21+((int)((i)/5))+(i*3);
 		punches.append( PunchingRecord( data.at(pstart), siTime( data.at(pstart+1), data.at(pstart+2) ) ) );
 	}
-	for(;i<(punchingcounter-1)&&i<37;i++ )
-		punches.append( PunchingRecord( data.at(0x20+(i-31)*16) ) );
+	for(;i<(punchingcounter-1)&&i<36;i++ )
+		punches.append( PunchingRecord( data.at(0x20+(i-30)*16) ) );
 	valid = true;
 	rawdata = data;
 	inittime = QDateTime::currentDateTime();
