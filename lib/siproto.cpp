@@ -408,11 +408,13 @@ PunchingRecord::PunchingRecord(const unsigned char *d)
 		time = QTime();
 	else
 		time = QTime(0, 0).addSecs( (d[PTH]<<8)|d[PTL] );
-	dayofweek = (d[PTD]&0x0E)>>1;
-	weekcounter = (d[PTD]&0x30)>>4;
-	// (d[PTD]&0xC0)>>6; // Value of Control Station High number
-	if ( d[PTD] & 0x1 )
-		time = time.addSecs( 43200 );
+	if (d[PTD] != 0xEE ) {
+		dayofweek = (d[PTD]&0x0E)>>1;
+		weekcounter = (d[PTD]&0x30)>>4;
+		// (d[PTD]&0xC0)>>6; // Value of Control Station High number
+		if ( d[PTD] & 0x1 )
+			time = time.addSecs( 43200 );
+	}
 }
 
 void SiCard6::addPunchBlock(int firstindex, const QByteArray &data)
