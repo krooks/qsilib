@@ -8,3 +8,4 @@ USB Driver for Mac
 - Apply patch silabusbdriver_patch_for_sportident.patch to /System/Library/Extensions/SiLabsUSBDriver.kext/Contents/Info.plist
 - sudo kextload /System/Library/Extensions/SiLabsUSBDriver.kext
 
+Here are some more explanation about using SportIdent on Mac : http://www.geco.webou.net/geco/faq.html
