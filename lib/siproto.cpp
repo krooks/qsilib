@@ -297,7 +297,11 @@ void SiCard6::reset()
 
 void SiCard6::resolveBackupBlocks( const QList<QByteArray> &blocks )
 {
-	if ( blocks.count() == 2 ) {
+	if ( blocks.count() == 0 ) {
+		return; // only first blcok nothing to resolve
+	} else if ( blocks.count() == 1 ) {
+		addBlock(6, blocks[0]); // when not in extended mode and reading 89pt we have it as card6 with one data block
+	} else if ( blocks.count() == 2 ) {
 		addBlock(6, blocks[0]);
 		addBlock(7, blocks[1]);
 	} else if ( blocks.count() == 3 ) {
@@ -642,6 +646,7 @@ void SiProto::serialReadyRead()
 					} else if ( lastreadinfo.stationmode == StationReadSICards ) {
 						readingcardbackup = true;
 						card6blocksread = 0;
+						card89blocksread = 0;
 					} else {
 						readingpunchbackup = true;
 					}
@@ -1276,8 +1281,18 @@ void SiProto::resolveCard6Backup(QList<SiCard> *clist)
 	card6blocksread = 0;
 }
 
+void SiProto::resolveCard89Backup(QList<SiCard> *clist)
+{
+	if ( clist ) {
+		clist->append( card89ptforread );
+	}
+	emit backupCard(&card89ptforread);
+	card89blocksread = 0;
+}
+
 void SiProto::handleCardBackupData(unsigned int /*addr*/, const QByteArray &data, QList<SiCard> *clist )
 {
+	dumpBuffer(data, "Backup block");
 	const unsigned char *b = (const unsigned char *)data.data();
 	if ( data.length() != 128 ) {
 		qWarning( "Could not get 128 bytes of backup data" );
@@ -1286,6 +1301,8 @@ void SiProto::handleCardBackupData(unsigned int /*addr*/, const QByteArray &data
 	if ( data.at(30) == 0x00 && data.at(31) == 0x07 ) {
 		if ( card6blocksread )
 			resolveCard6Backup(clist);
+		if (card89blocksread)
+			resolveCard89Backup(clist);
 		SiCard5 card( data );
 		emit backupCard(&card);
 		if ( clist )
@@ -1294,6 +1311,8 @@ void SiProto::handleCardBackupData(unsigned int /*addr*/, const QByteArray &data
 	} else if ( b[4] == 0xED && b[5] == 0xED && b[6] == 0xED && b[7] == 0xED  ) {
 		if ( card6blocksread )
 			resolveCard6Backup(clist);
+		if (card89blocksread)
+			resolveCard89Backup(clist);
 		card6forread.reset();
 		card6forread.addBlock(0, data);
 		card6blocksread = 1;
@@ -1302,13 +1321,25 @@ void SiProto::handleCardBackupData(unsigned int /*addr*/, const QByteArray &data
 	} else if ( b[4] == 0xEA && b[5] == 0xEA && b[6] == 0xEA && b[7] == 0xEA  ) {
 		if ( card6blocksread )
 			resolveCard6Backup(clist);
-		qWarning( "Backup reading Card8 / Card9 / pCard not impmlemented" );
+		if (card89blocksread)
+			resolveCard89Backup(clist);
+		card89ptforread.reset();
+		card89ptforread.addBlock(0, data);
+		card89blocksread = 1;
+		return;
+	}
+	if (card89blocksread) {
+		card89ptforread.addBlock(1,data);
+		resolveCard89Backup(clist);
+		return;
 	}
 	if ( card6blocksread ) {
 		card6backupblocks.append( data );
 		if ( card6backupblocks.count() == 6 )
 			resolveCard6Backup(clist);
+		return;
 	}
+	qWarning("Unknown backup block");
 }
 
 QList<PunchBackupData> SiProto::GetPunchBackupData()

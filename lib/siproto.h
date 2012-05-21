@@ -381,9 +381,11 @@ class SiProto : public QObject {
 	SiCard6 card6forread;
 	SiCard89pt card89ptforread;
 	int card6blocksread;
+	int card89blocksread;
 	QList<QByteArray> card6backupblocks;
 	int lastcard6block;
 	void resolveCard6Backup(QList<SiCard> *clist = NULL);
+	void resolveCard89Backup(QList<SiCard> *clist = NULL);
 
 	private slots:
 		void serialReadyRead();
