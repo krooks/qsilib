@@ -545,6 +545,13 @@ void SiProto::serialReadyRead()
 		QString cardver = QString::null;
 		int cn;
 		if( getCommand( cmnd, data, &cn ) ) {
+			if ( cmnd == CommandSICard5Detected || cmnd ==BaseCommandSICard5Detected || cmnd == CommandSICard6Detected || cmnd == BaseCommandSICard6Detected || cmnd == CommandSICard89ptDetected ) {
+				unsigned char *t = (unsigned char *)data.data();
+				if ( data.length() == 6 )
+					t += 2;
+				if ( data.length() >= 4 )
+					cnum = siCardNum(t[3],t[2],t[1],t[0]);
+			}
 			switch ( cmnd ) {
 			case 0x46: // FI ( SICard5 detected ) baseCommands[CommandSICard5Detected];
 				if ( data.at(0) != SICard5Inserted )
@@ -555,11 +562,20 @@ void SiProto::serialReadyRead()
 					sendCommand( CommandGetSICard5 );
 				break;
 			case CommandSICard6Detected: case BaseCommandSICard6Detected:
-				cardver = "6";
-				if ( doHandshake ) {
-					siCard6Inserted = true;
-					card6forread.reset();
-					GetSystemValue(CardBlocks, 1);
+				qDebug("Detected card ver 6");
+				if (cnum.toInt() >= 1000000 && cnum.toInt() <= 2999999) {
+					qDebug("Which is actually 89pt");
+					card89ptforread.reset();
+					QByteArray ba;
+					ba.append((char)0);
+					sendCommand( CommandGetSICard89pt,ba );
+				} else {
+					cardver = "6";
+					if ( doHandshake ) {
+						siCard6Inserted = true;
+						card6forread.reset();
+						GetSystemValue(CardBlocks, 1);
+					}
 				}
 				break;
 			case CommandSICard89ptDetected:
@@ -703,13 +719,6 @@ void SiProto::serialReadyRead()
 			default:
 				break;
 			};
-			if ( cmnd == CommandSICard5Detected || cmnd ==BaseCommandSICard5Detected || cmnd == CommandSICard6Detected || cmnd == BaseCommandSICard6Detected || cmnd == CommandSICard89ptDetected ) {
-				unsigned char *t = (unsigned char *)data.data();
-				if ( data.length() == 6 )
-					t += 2;
-				if ( data.length() >= 4 )
-					cnum = siCardNum(t[3],t[2],t[1],t[0]);
-			}
 			if ( !cardver.isNull() ) {
 				emit cardInserted(cardver,cnum);
 				QString cnumstring = "";
