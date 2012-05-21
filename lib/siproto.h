@@ -279,6 +279,8 @@ class SiProto : public QObject {
 		static SiCard cardFromData( const QByteArray ba );
 
 	private:
+		void dumpBuffer( const QByteArray &buf, const QString &s );
+
 		QStringList fullDeviceList( void );
 		QStringList searchdevicelist;
 

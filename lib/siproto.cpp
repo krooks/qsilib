@@ -533,11 +533,6 @@ void SiProto::serialReadyRead()
 		sibuf.append( tmp );
 		tmp = serial.read(100);
 	}
-#ifdef SI_COMM_DEBUG
-	qDebug( "From serial: %i", sibuf.count() );
-	for( int i=0;i<sibuf.size();i++ )
-		qDebug( "%i - %x", i, (unsigned char)sibuf.at(i) );
-#endif
 	if ( sibuf.count() ) {
 		unsigned char cmnd;
 		QByteArray data;
@@ -845,14 +840,7 @@ bool SiProto::sendCommand( unsigned char command, const QByteArray &data )
 	// TODO: simpleXOR crc
 	ba.append( ETX );
 #ifdef SI_COMM_DEBUG
-	for( int i=0;i<ba.size();i++ ) {
-		qDebug( "Wri: %i - 0x%02X", i, (unsigned char)ba.at(i) );
-	}
-	QString cm;
-	for( int i=0;i<ba.size();i++ ) {
-		cm.append( QString::number( (unsigned char )ba.at(i), 16 )+" " );
-	}
-	qDebug( "Writing: %s", qPrintable( cm ) );
+	dumpBuffer( ba, ">> Writing" );
 #endif
 	if ( serial.write( ba ) == ba.length() ) {
 		emit sentCommand(command, data);
@@ -904,6 +892,24 @@ bool SiProto::getCommand( unsigned char &cmnd, QByteArray &data, int *scn )
 	return true;
 }
 
+void SiProto::dumpBuffer( const QByteArray &buf, const QString &s )
+{
+	qDebug("%s", qPrintable(s));
+	QString line = "     ";
+	for( int i=0;i<16;i++ )
+		line += QString( " %1" ).arg((unsigned char)i,2,16,QChar('0'));
+	line += "\n";
+	line += QString("%1\n").arg( "", 3*16+5, QChar('-') );
+	for( int i=0;i<buf.length();i++ ) {
+		if ( !((i)%16 ) )
+			line += QString( "%1 : " ).arg((unsigned char)i,2,16,QChar('0'));
+		line += QString( " %1" ).arg((unsigned char)buf.at(i),2,16,QChar('0'));
+		if ( !((i+1)%16) )
+			line += "\n";
+	}
+	qDebug( "%s", qPrintable( line ) );
+}
+
 bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 {
 	int length;
@@ -915,21 +921,7 @@ bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 			sibuf.append( serial.read(1024) );
 		musttry = false;
 #ifdef SI_COMM_DEBUG
-		qDebug( "readCommand" );
-		QString line = "     ";
-		for( int i=0;i<16;i++ )
-			line += QString( " %1" ).arg((unsigned char)i,2,16,QChar('0'));
-		line += "\n";
-		line += QString("%1\n").arg( "", 3*16+5, QChar('-') );
-		for( int i=0;i<sibuf.length();i++ ) {
-			if ( !((i)%16 ) )
-				line += QString( "%1 : " ).arg((unsigned char)i,2,16,QChar('0'));
-			line += QString( " %1" ).arg((unsigned char)sibuf.at(i),2,16,QChar('0'));
-			if ( !((i+1)%16) )
-				line += "\n";
-			//qDebug( "\t0x%02X", (unsigned char)sibuf.at(i) );
-		}
-		qDebug( "%s", qPrintable( line ) );
+		dumpBuffer(sibuf, "<< readCommand");
 #endif
 		if ( sibuf.length() && sibuf.at(0) == NAK ) {
 			sibuf = sibuf.mid(1);
@@ -942,6 +934,9 @@ bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 		if ( sibuf.length() < 2 )
 			continue;
 		cmnd = sibuf.at(1);
+#ifdef SI_COMM_DEBUG
+		qDebug("Command: %02X", (unsigned char)cmnd);
+#endif
 		if ( cmnd >= 0x80 && cmnd != 0xC4 ) {
 			if ( sibuf.length() < 3 )
 				continue;
@@ -985,6 +980,9 @@ bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 				data = sibuf.mid( 2, pos-2 );
 				removeDLE( data );
 				sibuf = sibuf.mid( pos+1 );
+#ifdef SI_COMM_DEBUG
+				dumpBuffer(data, "after removeing STX/ETX/DLE");
+#endif
 				return true;
 			}
 		}
