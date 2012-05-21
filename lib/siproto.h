@@ -82,6 +82,7 @@ class SiCard {
 		QDateTime fullstarttime, fullchecktime, fullfinishtime;
 		QList<PunchingRecord> punches;
 		int punchingcounter;
+		QString name;
 
 		QDateTime inittime;
 		bool valid;
@@ -106,9 +107,9 @@ class SiCard89pt : public SiCard
 			UID1 = 0x01,
 			UID2 = 0x02,
 			UID3 = 0x03,
-			clearcheckstart = 8,
-			startstart = 12,
-			finishstart = 16,
+			clearcheckpage = 2,
+			startpage = 3,
+			finishpage = 4,
 			cnh = 20,
 			cnl = 21,
 			point = 22,
@@ -121,8 +122,10 @@ class SiCard89pt : public SiCard
 			vuyear = 29,
 			system1 = 30,
 			system0 = 31,
-			card9pstart = 56,
-			card8pstart = 136
+			card9startpage = 14,
+			card8startpage = 34,
+			pcardstartpage = 44,
+			tcardstartpage = 14
 		};
 };
 

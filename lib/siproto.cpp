@@ -244,17 +244,36 @@ void SiCard89pt::addBlock(int bn, const QByteArray &data)
 		cardnum = intcardnum&0xFFFFFF;
 		punchingcounter = d[point];
 	}
-	int pstart;
+	int startpage = 0; //incorrect value
 	int si3 = intcardnum>>24;
-	if ( si3 == 0x1 )
-		pstart = card9pstart/4;
-	else if ( si3 == 0x2 )
-		pstart = card8pstart/4;
+	if (si3 == 0x1)
+		startpage = card9startpage;
+	else if (si3 == 0x2)
+		startpage = card8startpage;
+	else if (si3 == 0x4)
+		startpage = 44;
 	if ( bn == 0 ) {
-		for( int i=0;i+pstart<32 && i<punchingcounter;i++ )
-			punches.append(PunchingRecord(d+((i+pstart)*4)));
+		checktime = PunchingRecord(d+(clearcheckpage*4));
+		starttime = PunchingRecord(d+(startpage*4));
+		finishtime = PunchingRecord(d+(finishpage*4));
+		int userdatalength = 0;
+		if ( si3 == 1 || si3 == 2 || si3 == 6 )
+			userdatalength = 24;
+		else if ( si3 == 4 )
+			userdatalength = 128;
+		else
+			qWarning("Unknown 89 card version(SI3): %i", si3);
+		if ( userdatalength > 0 ) {
+			QString namedata(data.mid(8*4,userdatalength));
+			QStringList nparts = namedata.split(";");
+			if ( nparts.count() > 2 )
+				name = QString("%1 %2").arg(nparts[0]).arg(nparts[1]);
+		}
+
+		for( int i=startpage;i<32 && i-startpage < punchingcounter;i++ )
+			punches.append(PunchingRecord(d+(i*4)));
 	} else if ( bn == 1 ) {
-		for( int i=0;i<32 && ((128-pstart)/4)+i<punchingcounter;i++ )
+		for( int i=startpage-32;i<32 && i < punchingcounter;i++ )
 			punches.append(PunchingRecord(d+(i*4)));
 	}
 }
