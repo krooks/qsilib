@@ -39,6 +39,11 @@ class PunchingRecord {
 		int dayofweek;
 		int weekcounter;
 
+		QTime getTime() const {
+			if (!pm)
+				return time;
+			return time.addSecs(43200);
+		}
 		QTime time;
 		QDateTime fulltime;
 
