@@ -62,6 +62,8 @@ class SiCard {
 			valid( false )
 		{};
 		
+		static SiCard *fromRawData(const QByteArray &ba);
+
 		void setEventStartTime( const QDateTime &dt );
 
 		int getCardNumber() const;

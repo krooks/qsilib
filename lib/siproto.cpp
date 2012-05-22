@@ -1519,3 +1519,18 @@ bool SiProto::ResetBackup()
 {
 	return sendCommand( CommandEraseBackupData );
 }
+
+SiCard *SiCard::fromRawData(const QByteArray &data)
+{
+	qDebug("Data length: %i", data.length());
+	const unsigned char *b = (const unsigned char *)data.data();
+	if ( data.at(30) == 0x00 && data.at(31) == 0x07 )
+		return new SiCard5( data );
+	else if ( b[4] == 0xED && b[5] == 0xED && b[6] == 0xED && b[7] == 0xED  ) {
+		return new SiCard6(data);
+	} else if ( b[4] == 0xEA && b[5] == 0xEA && b[6] == 0xEA && b[7] == 0xEA  ) {
+		return new SiCard89pt(data);
+	}
+
+	return NULL;
+}
