@@ -280,8 +280,9 @@ void SiCard89pt::addBlock(int bn, const QByteArray &data)
 
 SiCard6::SiCard6(const QByteArray &data)
 {
+	addBlock(0, data.mid(0,128));
 	QList<QByteArray> blocks;
-	for( int i=0;i<data.length();i+=128 ) {
+	for( int i=128;i<data.length();i+=128 ) {
 		blocks.append( data.mid(i,128 ) );
 	}
 	qDebug( "Card from data: %i, blocks: %i", data.length(), blocks.count() );
