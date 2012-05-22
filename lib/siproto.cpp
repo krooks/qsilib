@@ -913,6 +913,7 @@ void SiProto::dumpBuffer( const QByteArray &buf, const QString &s )
 bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 {
 	int length;
+	static int nakcount = 0;
 	bool musttry = false;
 	if ( sibuf.length() ) 
 		musttry = true;
@@ -924,11 +925,20 @@ bool SiProto::readCommand( unsigned char &cmnd, QByteArray &data )
 		dumpBuffer(sibuf, "<< readCommand");
 #endif
 		if ( sibuf.length() && sibuf.at(0) == NAK ) {
+			nakcount++;
 			sibuf = sibuf.mid(1);
 			emit statusMessage( "Got NAK response" );
+			if (readingpunchbackup || readingcardbackup) {
+				int stilltoread = backupreadendaddr-backupreadpointer;
+				if ( stilltoread>0 && lastreadinfo.backupreadsize && nakcount < 4) {
+					GetDataFromBackup( backupreadpointer, (stilltoread>lastreadinfo.backupreadsize ? lastreadinfo.backupreadsize : stilltoread));
+					return false;
+				}
+			}
 			emit gotNAK();
 			return false;
 		}
+		nakcount = 0;
 		while( sibuf.length() && sibuf.at(0) != STX ) 
 			sibuf = sibuf.mid( 1 );
 		if ( sibuf.length() < 2 )
