@@ -96,7 +96,7 @@ PunchBackupData::PunchBackupData( unsigned char *a, int size, double sw, int scn
 	if ( !hasdate && (TD & 0x1) )
 		t = t.addSecs( 43200 );
 	if ( hasdate ) {
-		d = QDate( ((DATE1&0xFC)>>2)+1000, (DATE1&0x03)<<2|(DATE0&0xC0)>>6, (DATE0&0x3E)>>1 );
+		d = QDate( ((DATE1&0xFC)>>2)+2000, (DATE1&0x03)<<2|(DATE0&0xC0)>>6, (DATE0&0x3E)>>1 );
 		if ( DATE0&0x1 )
 			t = t.addSecs( 43200 );
 	}
