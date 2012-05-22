@@ -229,6 +229,15 @@ QTime SiCard::siTime( unsigned char s2, unsigned char s1 )
 	return QTime(0, 0).addSecs( (s2<<8)|s1 );
 }
 
+SiCard89pt::SiCard89pt( const QByteArray &data )
+{
+	if ( data.length() < 256 ) {
+		qWarning("SiCard89 needs 256 bytes. Got only : %i", data.length() );
+	}
+	addBlock( 0, data.mid(0,128) );
+	addBlock( 1, data.mid(128,128) );
+}
+
 void SiCard89pt::reset()
 {
 	punchingcounter = 0;
@@ -238,6 +247,7 @@ void SiCard89pt::reset()
 
 void SiCard89pt::addBlock(int bn, const QByteArray &data)
 {
+	rawData.append(data);
 	unsigned char *d = (unsigned char *)data.data();
 	if ( bn == 0 ) {
 		intcardnum = siCardNum(d[SI0], d[SI1], d[SI2], d[SI3]);

@@ -103,6 +103,8 @@ class SiCard {
 class SiCard89pt : public SiCard
 {
 	public:
+		SiCard89pt( const QByteArray &data128 );
+		SiCard89pt() : SiCard() {};
 		void reset();
 		void addBlock( int bn, const QByteArray &data128 );
 		//QString dumpstr( void ) const;
