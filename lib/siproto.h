@@ -290,6 +290,8 @@ class SiProto : public QObject {
 		}
 		static SiCard cardFromData( const QByteArray ba );
 
+		void setEventStartTime( const QDateTime &dt );
+
 	private:
 		void dumpBuffer( const QByteArray &buf, const QString &s );
 
@@ -400,6 +402,8 @@ class SiProto : public QObject {
 	int lastcard6block;
 	void resolveCard6Backup(QList<SiCard> *clist = NULL);
 	void resolveCard89Backup(QList<SiCard> *clist = NULL);
+
+	QDateTime eventStartTime;
 
 	private slots:
 		void serialReadyRead();

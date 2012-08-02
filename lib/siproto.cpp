@@ -556,6 +556,11 @@ SiProto::SiProto( QObject *parent ) :
 			 SLOT( serialReadyRead() ) );
 }
 
+void SiProto::setEventStartTime( const QDateTime &dt )
+{
+	eventStartTime = dt;
+}
+
 void SiProto::serialReadyRead()
 {
 	QByteArray tmp = serial.read(100);
@@ -621,6 +626,8 @@ void SiProto::serialReadyRead()
 						ba.append((char)1);
 						sendCommand( CommandGetSICard89pt,ba );
 					} else if ( bn == 1 ) {
+						if (eventStartTime.isValid())
+							card89ptforread.setEventStartTime(eventStartTime);
 						emit cardRead( card89ptforread );
 					}
 					break;
@@ -629,6 +636,8 @@ void SiProto::serialReadyRead()
 				{
 					SiCard5 card( data );
 					card.print();
+					if (eventStartTime.isValid())
+						card.setEventStartTime(eventStartTime);
 					emit cardRead( card );
 					if ( autoAccept )
 						sendACK();
@@ -640,6 +649,8 @@ void SiProto::serialReadyRead()
 					card6forread.addBlock(bn, data.mid(1));
 					if ( bn == lastcard6block ) {
 						card6forread.print();
+						if (eventStartTime.isValid())
+							card6forread.setEventStartTime(eventStartTime);
 						emit cardRead( card6forread );
 						if ( autoAccept )
 							sendACK();
