@@ -212,8 +212,10 @@ QString SiCard::dumpstr( void ) const
 	s += tmp;
 	s += QString("Start number: %0\n").arg(startnum);
 	s += QString("Punching counter: %0\n").arg(punchingcounter);
+	if (!name.isEmpty())
+	s += QString("Name: %0\n").arg(name);
 	for( int i=0;i<punches.count();i++ )
-		s += QString( "P %0: CN: %1, %2\n").arg(i).arg(punches.at(i).cn).arg( punches.at(i).time.toString() );
+		s += QString( "P %0: CN: %1, %2, %3\n").arg(i).arg(punches.at(i).cn).arg( punches.at(i).getTime().toString()).arg(punches.at(i).pm);
 	return s;
 }
 
@@ -236,6 +238,23 @@ SiCard89pt::SiCard89pt( const QByteArray &data )
 	}
 	addBlock( 0, data.mid(0,128) );
 	addBlock( 1, data.mid(128,128) );
+
+QString SiCard89pt::dumpstr( void ) const
+{
+	QString s;
+	switch ( si3 & 0xF ) {
+		case 1:
+			s = "SPORTident-Card 9\n"; break;
+		case 2:
+			s = "SPORTident-Card 8\n"; break;
+		case 4:
+			s = "SPORTident pCard\n"; break;
+		case 6:
+			s = "SPORTident tCard\n"; break;
+
+	}
+	s += SiCard::dumpstr();
+	return s;
 }
 
 void SiCard89pt::reset()

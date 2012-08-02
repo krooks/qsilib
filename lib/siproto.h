@@ -59,6 +59,9 @@ class PunchingRecord {
 class SiCard {
 	public:
 		SiCard() : 
+			countrycode(0),
+			clubcode(0),
+			startnum(0),
 			valid( false )
 		{};
 		
@@ -109,7 +112,7 @@ class SiCard89pt : public SiCard
 		SiCard89pt() : SiCard() {};
 		void reset();
 		void addBlock( int bn, const QByteArray &data128 );
-		//QString dumpstr( void ) const;
+		virtual QString dumpstr( void ) const;
 	private:
 		enum {
 			UID0 = 0x00,
