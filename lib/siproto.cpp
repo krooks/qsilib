@@ -629,6 +629,8 @@ void SiProto::serialReadyRead()
 						if (eventStartTime.isValid())
 							card89ptforread.setEventStartTime(eventStartTime);
 						emit cardRead( card89ptforread );
+						if ( autoAccept )
+							sendACK();
 					}
 					break;
 				}
